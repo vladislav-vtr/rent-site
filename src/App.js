@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+
 
 // — Tailwind для стилей (включён в Canvas)
 // — Никаких внешних API, чистый React
@@ -9,6 +10,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("consoles");
   const [term, setTerm] = useState("day");
   const [query, setQuery] = useState("");
+  const [scrollToForm, setScrollToForm] = useState(false);
 
   const catalog = useMemo(
     () => ({
@@ -78,12 +80,17 @@ export default function App() {
             <a href="#order" className="hover:text-black/70">Заказ</a>
             <a href="#contacts" className="hover:text-black/70">Контакты</a>
           </nav>
-          <a
-            href="#order"
+
+
+          <button
+            onClick={() => {
+              setScrollToForm(true);
+              setTimeout(() => setScrollToForm(false), 1000); // сбрасываем флаг через 1 секунду
+            }}
             className="ml-auto md:ml-2 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:opacity-90 transition-transform hover:scale-[1.03]"
           >
             🚀 Арендовать
-          </a>
+          </button>
         </div>
       </header>
 
@@ -234,7 +241,7 @@ export default function App() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Оформить заказ</h2>
             <p className="text-sm text-neutral-600 mt-2">Укажите контакты — менеджер свяжется с вами в течение 15 минут, подтвердит наличие и дотавку </p>
-            <OrderForm />
+            <OrderForm scrollTo={scrollToForm} />
           </div>
           <div className="rounded-3xl border bg-white p-5 shadow-sm">
             <h3 className="font-semibold">Как это работает</h3>
@@ -324,196 +331,138 @@ function ProductCard({ product, term }) {
   );
 }
 
-
-// Раздел сайта с формой бронирования "Оформить заказ".
-// В форме 4 параметра: имя, фамилия, телефон и выбранный пакет 
-
-function OrderForm() {
-
+// Раздел сайта с формой бронирования "Оформить заказ"
+// Раздел сайта с формой бронирования "Оформить заказ"
+function OrderForm({ scrollTo }) {
   const [form, setForm] = useState({
     name: "",
     surname: "",
     phone: "",
     package: "",
   });
-
-  // Флаг для отображения сообщения после отправки
   const [sent, setSent] = useState(false);
+  const formRef = useRef(null);
 
-  // Обработчик отправки формы
+  // Скроллим ТОЛЬКО если передан флаг scrollTo = true
+  // Добавлено: учёт высоты хедера (yOffset), чтобы форма не пряталась под шапкой
+  useEffect(() => {
+    if (scrollTo && formRef.current) {
+      const yOffset = -200; // регулируй под высоту своего хедера
+      const y =
+        formRef.current.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [scrollTo]);
+
+  // Отправка формы — показываем сообщение после сабмита
   const onSubmit = (e) => {
     e.preventDefault();
     setSent(true);
-    
   };
 
-  // После нажатия кнопки "Отправить заявку" — показываем сообщение об успешной отправке
+  // Если форма уже отправлена — показываем сообщение об успехе
   if (sent) {
     return (
-      <div className="mt-4 rounded-2xl border bg-white p-4 text-sm">
-        Спасибо! Мы свяжемся с вами в ближайшее время для подтверждения заказа.
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="mt-4 grid gap-3">
-      {/* Блок с полями "Имя" и "Фамилия" */}
-      <div className="grid sm:grid-cols-2 gap-3">
-        <label className="grid gap-1 text-sm">
-          <span>Имя</span>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="Иван"
-          />
-        </label>
-
-        <label className="grid gap-1 text-sm">
-          <span>Фамилия</span>
-          <input
-            required
-            value={form.surname}
-            onChange={(e) => setForm({ ...form, surname: e.target.value })}
-            className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="Иванов"
-          />
-        </label>
-      </div>
-
-      {/* Поле с телефоном с автоподстановкой +7 и форматированием номера */}
-      <label className="grid gap-1 text-sm">
-        <span>Телефон</span>
-        <input
-          required
-          type="tel"
-          value={form.phone}
-          onChange={(e) => {
-            // Удаляем все нецифры
-            let value = e.target.value.replace(/\D/g, "");
-
-            // Если пользователь вручную ввёл 7 после +7 — убираем её
-            if (value.startsWith("7")) value = value.slice(1);
-
-            // Форматируем номер: +7 (XXX) XXX-XX-XX
-            let formatted = "+7";
-            if (value.length > 0) formatted += " (" + value.substring(0, 3);
-            if (value.length >= 4) formatted += ") " + value.substring(3, 6);
-            if (value.length >= 7) formatted += "-" + value.substring(6, 8);
-            if (value.length >= 9) formatted += "-" + value.substring(8, 10);
-
-            setForm({ ...form, phone: formatted });
-          }}
-          placeholder="+7 (___) ___-__-__"
-          className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-        />
-      </label>
-
-      {/* Выпадающий список с выбором пакета аренды */}
-      <label className="grid gap-1 text-sm">
-        <span>Пакет</span>
-        <select
-          required
-          value={form.package}
-          onChange={(e) => setForm({ ...form, package: e.target.value })}
-          className="rounded-2xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black/20"
-        >
-          <option value="">Выберите пакет</option>
-          <option value="weekend">Пакет “Выходные”</option>
-          <option value="super">Пакет “Супер”</option>
-          <option value="mega">Пакет “Мега”</option>
-          <option value="hyper">Пакет “Гипер”</option>
-        </select>
-      </label>
-
-      {/* Кнопка отправки формы */}
-      <button
-        type="submit"
-        className="mt-2 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:opacity-90 transition-transform hover:scale-[1.03]"
+      <div
+        ref={formRef}
+        className="mt-4 rounded-2xl border bg-white p-4 text-sm scroll-mt-8"
       >
-        Отправить заявку
-      </button>
-    </form>
-  );
-}
-
-/*
-function OrderForm() {
-  const [form, setForm] = useState({ name: "пуеф", phone: "", item: "", term: "1 сутки", comment: "" });
-  const [sent, setSent] = useState(false);
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-    // Здесь можно отправить в ваш backend/webhook, который пробросит в Telegram бота или канал
-    // fetch("/api/order", { method: "POST", body: JSON.stringify(form) })
-    setSent(true);
-  };
-
-  if (sent) {
-    return (
-      <div className="mt-4 rounded-2xl border bg-white p-4 text-sm">
         Спасибо! Мы свяжемся с вами в ближайшее время для подтверждения заказа.
       </div>
     );
   }
 
+  // Основная форма бронирования
   return (
-    <form onSubmit={onSubmit} className="mt-4 grid gap-3">
-      <div className="grid sm:grid-cols-2 gap-3">
-        <label className="grid gap-1 text-sm">
-          <span>Имя</span>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="Иван"
-          />
-        </label>
+    <div ref={formRef} className="mt-4 scroll-mt-8">
+      <form onSubmit={onSubmit} className="grid gap-3">
+        {/* --- Поля Имя и Фамилия --- */}
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="grid gap-1 text-sm">
+            <span>Имя</span>
+            <input
+              required
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+              placeholder="Иван"
+            />
+          </label>
+
+          <label className="grid gap-1 text-sm">
+            <span>Фамилия</span>
+            <input
+              required
+              value={form.surname}
+              onChange={(e) => setForm({ ...form, surname: e.target.value })}
+              className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+              placeholder="Иванов"
+            />
+          </label>
+        </div>
+
+        {/* --- Поле телефона с форматированием --- */}
         <label className="grid gap-1 text-sm">
           <span>Телефон</span>
           <input
             required
+            type="tel"
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            onChange={(e) => {
+              let value = e.target.value.replace(/\D/g, "");
+              if (value.startsWith("7")) value = value.slice(1);
+              let formatted = "+7";
+              if (value.length > 0) formatted += " (" + value.substring(0, 3);
+              if (value.length >= 4) formatted += ") " + value.substring(3, 6);
+              if (value.length >= 7) formatted += "-" + value.substring(6, 8);
+              if (value.length >= 9) formatted += "-" + value.substring(8, 10);
+              setForm({ ...form, phone: formatted });
+            }}
+            placeholder="+7 (___) ___-__-__"
             className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="+7 ___ ___‑__‑__"
           />
         </label>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-3">
+
+        {/* --- Выбор пакета --- */}
         <label className="grid gap-1 text-sm">
-          <span>Что арендуем</span>
-          <input
-            value={form.item}
-            onChange={(e) => setForm({ ...form, item: e.target.value })}
-            className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="PS5, Xbox, VR..."
-          />
+          <span>Пакет</span>
+          <select
+            required
+            value={form.package}
+            onChange={(e) => setForm({ ...form, package: e.target.value })}
+            className="rounded-2xl border px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-black/20"
+          >
+            <option value="">Выберите пакет</option>
+            <option value="weekend">Пакет “Выходные”</option>
+            <option value="super">Пакет “Супер”</option>
+            <option value="mega">Пакет “Мега”</option>
+            <option value="hyper">Пакет “Гипер”</option>
+          </select>
         </label>
-        <label className="grid gap-1 text-sm">
-          <span>Срок</span>
-          <input
-            value={form.term}
-            onChange={(e) => setForm({ ...form, term: e.target.value })}
-            className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
-            placeholder="1 сутки, неделя, месяц"
-          />
-        </label>
+
+        {/* --- Кнопка отправки формы --- */}
+        <button
+          type="submit"
+          className="mt-2 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:opacity-90 transition-transform hover:scale-[1.03]"
+        >
+          Отправить заявку
+        </button>
+      </form>
+
+      {/* --- Раздел "Что требуется для аренды" --- */}
+      <div className="mt-8 rounded-2xl border bg-white p-4">
+        <h3 className="text-lg font-semibold mb-2">
+          Что требуется для аренды 🔒
+        </h3>
+        <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+          <li>Возраст от 18 лет</li>
+          <li>Паспорт гражданина РФ</li>
+          <li>Подписание договора аренды</li>
+          <li>Согласие на обработку персональных данных</li>
+        </ul>
       </div>
-      <label className="grid gap-1 text-sm">
-        <span>Комментарий</span>
-        <textarea
-          value={form.comment}
-          onChange={(e) => setForm({ ...form, comment: e.target.value })}
-          className="rounded-2xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20 min-h-[90px]"
-          placeholder="Адрес, время, комплектация"
-        />
-      </label>
-      <button type="submit" className="mt-2 inline-flex w-full sm:w-auto items-center justify-center rounded-2xl bg-black text-white px-5 py-3 text-sm font-medium shadow hover:bg-black/90">Отправить заявку</button>
-    </form>
+    </div>
   );
 }
-*/

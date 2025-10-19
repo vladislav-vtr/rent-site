@@ -1,9 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-
+import { Button } from "./components/ui/Button"; // ✅ добавь эту строку
 
 // — Tailwind для стилей (включён в Canvas)
 // — Никаких внешних API, чистый React
-// — Лёгкая замена бренда/цветов/товаров внизу в catalog
 // — Готовые блоки: хедер, герой, преимущества, каталог с фильтрами, FAQ, контакты/заказ
 
 export default function App() {
@@ -11,6 +10,7 @@ export default function App() {
   const [term, setTerm] = useState("day");
   const [query, setQuery] = useState("");
   const [scrollToForm, setScrollToForm] = useState(false);
+
 
   const catalog = useMemo(
     () => ({
@@ -65,44 +65,71 @@ export default function App() {
   }, [catalog, activeTab, query]);
 
   return (
+
     <div className="min-h-screen bg-white text-neutral-900">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="size-9 rounded-2xl bg-black text-white grid place-items-center font-bold">VR</div>
-            <div className="font-semibold tracking-tight">V-RENT</div>
+
+      <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-gray-900/80 text-white py-3 shadow-md transition-all duration-300">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-6">
+          {/* Логотип */}
+          <div className="text-xl font-bold tracking-tight mb-3 md:mb-0">
+            GameRent
           </div>
-          <nav className="ml-auto hidden md:flex items-center gap-6 text-sm">
-            <a href="#catalog" className="hover:text-black/70">Каталог</a>
-            <a href="#benefits" className="hover:text-black/70">Почему мы</a>
-            <a href="#faq" className="hover:text-black/70">FAQ</a>
-            <a href="#order" className="hover:text-black/70">Заказ</a>
-            <a href="#contacts" className="hover:text-black/70">Контакты</a>
+
+          {/* Навигация */}
+          <nav className="flex space-x-5 text-base font-medium justify-center w-full md:w-auto">
+            <a href="#catalog" className="hover:text-indigo-400 transition-colors">
+              Каталог
+            </a>
+            <a href="#about" className="hover:text-indigo-400 transition-colors">
+              О нас
+            </a>
+            <a href="#delivery" className="hover:text-indigo-400 transition-colors">
+              Доставка
+            </a>
+            <a href="#contacts" className="hover:text-indigo-400 transition-colors">
+              Контакты
+            </a>
+            <a href="/cooperation" className="hover:text-indigo-400 transition-colors">
+              Сотрудничество
+            </a>
           </nav>
 
-
-          <button
-            onClick={() => {
-              setScrollToForm(true);
-              setTimeout(() => setScrollToForm(false), 1000); // сбрасываем флаг через 1 секунду
-            }}
-            className="ml-auto md:ml-2 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:opacity-90 transition-transform hover:scale-[1.03]"
-          >
-            🚀 Арендовать
-          </button>
+          {/* Кнопка "Открыть каталог" */}
+          <div className="mt-3 md:mt-0">
+            <Button
+              onClick={() => {
+                const section = document.getElementById("catalog");
+                if (section) section.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Открыть каталог
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="bg-neutral-50 border-b">
+      <section id="hero" className="pt-24">
         <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Аренда PS5/Xbox и аксессуаров с доставкой по городу</h1>
             <p className="mt-4 text-neutral-600"> Привезём, подключим, покажем — остаётся только играть</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#order" className="inline-flex rounded-2xl bg-black text-white px-5 py-3 text-sm font-medium shadow hover:bg-black/90">Сделать заказ</a>
-              <a href="#catalog" className="inline-flex rounded-2xl border px-5 py-3 text-sm font-medium hover:bg-neutral-100">Открыть каталог</a>
+              {/* Кнопка “Открыть каталог” */}
+              <a
+                href="#catalog"
+                className="inline-flex items-center justify-center rounded-2xl border border-neutral-300 px-6 py-2.5 text-sm font-semibold hover:bg-neutral-100 transition-colors shadow-sm"
+              >
+                📦 Открыть каталог
+              </a>
+
+              {/* Кнопка “Сделать заказ” */}
+              <button
+                onClick={() => setScrollToForm(true)}
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50"
+              >
+                Сделать заказ
+              </button>
             </div>
             <ul className="mt-6 grid grid-cols-2 gap-3 text-sm text-neutral-700">
               <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Доставка от 300 ₽</li>
@@ -113,17 +140,12 @@ export default function App() {
           </div>
           <div className="relative">
             {/* “Экран” */}
-            <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-neutral-200 to-neutral-100 shadow-inner flex items-center justify-center">
-              <img
-                src="/check-kit.png"
-                alt="Проверка комплекта"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
+            <div className="relative">
+              <HeroSlideshow />
 
-            {/* Подпись под окном */}
-            <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white shadow p-3 text-xs border">
-              Оплатите после проверки комплекта — так спокойнее ✨
+              <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white shadow p-3 text-xs border">
+                Оплатите после проверки комплекта — так спокойнее ✨
+              </div>
             </div>
           </div>
         </div>
@@ -332,7 +354,6 @@ function ProductCard({ product, term }) {
 }
 
 // Раздел сайта с формой бронирования "Оформить заказ"
-// Раздел сайта с формой бронирования "Оформить заказ"
 function OrderForm({ scrollTo }) {
   const [form, setForm] = useState({
     name: "",
@@ -466,3 +487,49 @@ function OrderForm({ scrollTo }) {
     </div>
   );
 }
+function HeroSlideshow() {
+  const images = ["/check-kit.png", "/The-Witcher-3.jpg", "/EA-FC-Is-Just-FIFA-Culture.jpg"];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, 4000); // смена каждые 4 секунды
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="aspect-[4/3] rounded-3xl overflow-hidden relative shadow-inner">
+      {images.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${i === index ? "opacity-100" : "opacity-0"
+            }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* 
+{/* Top bar */
+/*
+<header className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b">
+  <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
+    <div className="flex items-center gap-2">
+      <div className="size-9 rounded-2xl bg-black text-white grid place-items-center font-bold">VR</div>
+      <div className="font-semibold tracking-tight">Ваш Бренд</div>
+    </div>
+    <nav className="ml-auto hidden md:flex items-center gap-6 text-sm">
+      <a href="#catalog" className="hover:text-black/70">Каталог</a>
+      <a href="#benefits" className="hover:text-black/70">Почему мы</a>
+      <a href="#faq" className="hover:text-black/70">FAQ</a>
+      <a href="#order" className="hover:text-black/70">Заказ</a>
+      <a href="#contacts" className="hover:text-black/70">Контакты</a>
+    </nav>
+    <a href="#order" className="ml-auto md:ml-2 inline-flex items-center rounded-2xl border px-4 py-2 text-sm font-medium bg-black text-white hover:bg-black/90 shadow-sm">Арендовать</a>
+  </div>
+</header>
+*/

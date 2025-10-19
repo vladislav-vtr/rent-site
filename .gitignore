@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 
 # dependencies
 /node_modules
@@ -21,3 +21,20 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+#telegram bot main (prod)
+BOT_TOKEN_PROD
+
+V-RENT-EKB
+t.me/v_rent_ekb_bot.
+HTTP API:
+7933216697:AAGqtuJdfywEBIjD3oIU6uEg2j8JjxfnYIQ
+
+#telegram bot developer 
+BOT_TOKEN_DEV
+
+vrent-demo
+t.me/vrent_demo_bot.
+HTTP API:
+8401233783:AAGV_0vM8GxRVtTLdbngnvmzKDCUnx2rZX8

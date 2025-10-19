@@ -1,0 +1,375 @@
+{
+  "name": "PS5_Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        -208
+      ],
+      "id": "924cabe7-055b-4d55-8b70-4aa8278b6c42",
+      "name": "Telegram Trigger",
+      "webhookId": "fe3d8487-e6fe-418a-8d19-b44a7be206e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a2719f81-d114-4e92-a01f-467825a78a2e",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/new_order",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -208
+      ],
+      "id": "01b6a805-5464-49fa-9b23-a3246c3701e6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "## Триггер на комманду",
+        "height": 400,
+        "width": 1120
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "b28ceee5-d9d5-48f2-a41b-4134d8efe77d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Тригер на вебхук с формы с сайта\n{\n\"name\":\"\",\n\"surname\":\"\",\n\"phone\":\"\",\n\"package\":\"\",\n\"product\":\"\",\n\"orderSource\":\"\",\n\"tg_id\":\"\"\n}",
+        "height": 464,
+        "width": 1120
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "3ece051b-a094-4cbe-bfa5-adae0da0ec09",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ps5-order-form",
+        "responseMode": "streaming",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        256
+      ],
+      "id": "1bfd0afe-12bf-43c2-8779-20db3718218b",
+      "name": "Webhook",
+      "webhookId": "b7477d33-5ea5-4692-be4c-033a125e068a"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $json.message.chat.id }}",
+        "message": "Введите в форму данные для заказа",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Имя",
+              "placeholder": "Имя",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Фамилия",
+              "placeholder": "Фамилия",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Номер телефона",
+              "fieldType": "number",
+              "placeholder": "Номер телефона",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Пакет",
+              "placeholder": "Название пакета",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Товар",
+              "placeholder": "Товар",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Источник заказа",
+              "fieldType": "hiddenField",
+              "fieldValue": "Вручную"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        -224
+      ],
+      "id": "2feb1984-c833-4bf7-ab0f-a9d6ac036535",
+      "name": "Send message and wait for response",
+      "webhookId": "96072dcf-3610-41f8-9196-1694ed187e26",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=123",
+        "text": "=Был оформлен заказ!\nИмя: {{ $json.data['Имя'] }}\nФамилия: {{ $json.data['Фамилия'] }}\nНомер телефона: {{ $json.data['Номер телефона'] }}\nПакет: {{ $json.data['Пакет'] }}\nТовар: {{ $json.data['Товар'] }}\nИсточник заказа: {{ $json.data['Источник заказа'] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        -192
+      ],
+      "id": "091a84da-f875-49d8-85d1-a1802f49ee9e",
+      "name": "Сообщение продавцу",
+      "webhookId": "734ff4ab-fcd9-4425-bff0-5b8cbb9dffbe",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('If').item.json.message.chat.id }}",
+        "text": "=Ваш заказ оформлен! \nИмя: {{ $json.data['Имя'] }} \nФамилия: {{ $json.data['Фамилия'] }} \nНомер телефона: {{ $json.data['Номер телефона'] }} \nПакет: {{ $json.data['Пакет'] }} \nТовар: {{ $json.data['Товар'] }} \nИсточник заказа: {{ $json.data['Источник заказа'] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        -336
+      ],
+      "id": "1e937e97-6932-452c-b66b-e265cfca6c1b",
+      "name": "Сообщение заказчику",
+      "webhookId": "e7518672-064e-462c-bac3-299e25623eef",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = `Оформлен заказ:\nИмя: ${$input.first().json.body.name}\nФамилия: ${$input.first().json.body.surname}\nНомер телефона: ${$input.first().json.body.phone}\nПакет: ${$input.first().json.body.package}\nТовар: ${$input.first().json.body.product}\nИсточник заказа: ${$input.first().json.body.orderSource}\nСпасибо что пользуетесь нашим сервисом!`\nreturn { message };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        256
+      ],
+      "id": "4a59781c-cb17-43ec-ab2e-4e9088a932d5",
+      "name": "Code in JavaScript"
+    },
+    {
+
+
+
+
+      "parameters": {
+        "chatId": "123",
+        "text": "=Был оформлен заказ! \nИмя: {{ $('Webhook').item.json.body.name }}\nФамилия: {{ $('Webhook').item.json.body.surname }}\nНомер телефона: {{ $('Webhook').item.json.body.phone }}\nПакет: {{ $('Webhook').item.json.body.package }}\nТовар: {{ $('Webhook').item.json.body.product }}\nИсточник заказа: {{ $('Webhook').item.json.body.orderSource }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        352
+      ],
+      "id": "457339ef-0333-4733-8654-093ba59e87dd",
+      "name": "Сообщение продавцу - с формы сайта",
+      "webhookId": "cd2f6c7d-fa69-43c1-b186-898984ab0722",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Webhook').item.json.body.tg_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        160
+      ],
+      "id": "c6da4672-9a9f-42bf-9fd4-c7ef2f085e19",
+      "name": "Сообщение заказчику - с формы сайта",
+      "webhookId": "f41b5223-2ba3-4a5f-973e-e09e8fc0268d",
+      "credentials": {
+        "telegramApi": {
+          "id": "z2algu9WEbheswu7",
+          "name": "PS5_BOT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## @SonyPS_5_bot"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "1315ff5a-132d-41cf-8f3e-e2e4e3059920",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Сообщение заказчику",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Сообщение продавцу",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Сообщение заказчику - с формы сайта",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Сообщение продавцу - с формы сайта",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bc975f7b-8b9c-4a5c-8f1f-15f070d5fc3e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8266065281016f3be1d667da2beedbc8549bf209c03d47e7311f0956fda833d4"
+  },
+  "id": "XiCFYcTA9xR3uXqn",
+  "tags": []
+}

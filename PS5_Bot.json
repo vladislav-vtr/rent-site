@@ -168,7 +168,7 @@
     },
     {
       "parameters": {
-        "chatId": "=123",
+        "chatId": "=583073638",
         "text": "=Был оформлен заказ!\nИмя: {{ $json.data['Имя'] }}\nФамилия: {{ $json.data['Фамилия'] }}\nНомер телефона: {{ $json.data['Номер телефона'] }}\nПакет: {{ $json.data['Пакет'] }}\nТовар: {{ $json.data['Товар'] }}\nИсточник заказа: {{ $json.data['Источник заказа'] }}",
         "additionalFields": {
           "appendAttribution": false
@@ -233,7 +233,7 @@
 
 
       "parameters": {
-        "chatId": "123",
+        "chatId": "583073638",
         "text": "=Был оформлен заказ! \nИмя: {{ $('Webhook').item.json.body.name }}\nФамилия: {{ $('Webhook').item.json.body.surname }}\nНомер телефона: {{ $('Webhook').item.json.body.phone }}\nПакет: {{ $('Webhook').item.json.body.package }}\nТовар: {{ $('Webhook').item.json.body.product }}\nИсточник заказа: {{ $('Webhook').item.json.body.orderSource }}",
         "additionalFields": {
           "appendAttribution": false

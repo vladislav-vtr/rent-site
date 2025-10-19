@@ -6,6 +6,7 @@ import { Button } from "./components/ui/Button"; // ✅ добавь эту ст
 // — Готовые блоки: хедер, герой, преимущества, каталог с фильтрами, FAQ, контакты/заказ
 
 export default function App() {
+  
   const [activeTab, setActiveTab] = useState("consoles");
   const [term, setTerm] = useState("day");
   const [query, setQuery] = useState("");
@@ -378,10 +379,28 @@ function OrderForm({ scrollTo }) {
   }, [scrollTo]);
 
   // Отправка формы — показываем сообщение после сабмита
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setSent(true);
-  };
+  
+    try {
+      // Ссылка на Webhook 
+      const webhookUrl = "https://n8n.hive-dev.ru/webhook/ps5-order-form";
+
+      // Отправляем данные формы в Telegram (через твой backend/webhook)
+      await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+  
+      setSent(true);
+    } catch (error) {
+      console.error("Ошибка при отправке:", error);
+      alert("Произошла ошибка при отправке. Попробуйте позже.");
+    }
+  };;
 
   // Если форма уже отправлена — показываем сообщение об успехе
   if (sent) {

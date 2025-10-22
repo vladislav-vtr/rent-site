@@ -1,12 +1,16 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { Button } from "./components/ui/Button"; // ✅ добавь эту строку
+import { Button } from "./components/ui/Button";
+
+//header imports
+import { Globe, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // — Tailwind для стилей (включён в Canvas)
 // — Никаких внешних API, чистый React
 // — Готовые блоки: хедер, герой, преимущества, каталог с фильтрами, FAQ, контакты/заказ
 
 export default function App() {
-  
+
   const [activeTab, setActiveTab] = useState("consoles");
   const [term, setTerm] = useState("day");
   const [query, setQuery] = useState("");
@@ -69,52 +73,19 @@ export default function App() {
 
     <div className="min-h-screen bg-white text-neutral-900">
 
-      <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-gray-900/80 text-white py-3 shadow-md transition-all duration-300">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-6">
-          {/* Логотип */}
-          <div className="text-xl font-bold tracking-tight mb-3 md:mb-0">
-            GameRent
-          </div>
-
-          {/* Навигация */}
-          <nav className="flex space-x-5 text-base font-medium justify-center w-full md:w-auto">
-            <a href="#catalog" className="hover:text-indigo-400 transition-colors">
-              Каталог
-            </a>
-            <a href="#about" className="hover:text-indigo-400 transition-colors">
-              О нас
-            </a>
-            <a href="#delivery" className="hover:text-indigo-400 transition-colors">
-              Доставка
-            </a>
-            <a href="#contacts" className="hover:text-indigo-400 transition-colors">
-              Контакты
-            </a>
-            <a href="/cooperation" className="hover:text-indigo-400 transition-colors">
-              Сотрудничество
-            </a>
-          </nav>
-
-          {/* Кнопка "Открыть каталог" */}
-          <div className="mt-3 md:mt-0">
-            <Button
-              onClick={() => {
-                const section = document.getElementById("catalog");
-                if (section) section.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              Открыть каталог
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero */}
       <section id="hero" className="pt-24">
         <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Аренда PS5/Xbox и аксессуаров с доставкой по городу</h1>
-            <p className="mt-4 text-neutral-600"> Привезём, подключим, покажем — остаётся только играть</p>
+            {/* === Анимированный заголовок === */}
+            <AnimatedTitle />
+
+            <p className="mt-4 text-neutral-600 text-lg">
+              Привезём, подключим, покажем — остаётся только играть
+            </p>
+
             <div className="mt-6 flex flex-wrap gap-3">
               {/* Кнопка “Открыть каталог” */}
               <a
@@ -132,6 +103,7 @@ export default function App() {
                 Сделать заказ
               </button>
             </div>
+
             <ul className="mt-6 grid grid-cols-2 gap-3 text-sm text-neutral-700">
               <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Доставка от 300 ₽</li>
               <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Самовывоз по договорённости</li>
@@ -139,11 +111,10 @@ export default function App() {
               <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Поддержка в мессенджерах</li>
             </ul>
           </div>
+
           <div className="relative">
-            {/* “Экран” */}
             <div className="relative">
               <HeroSlideshow />
-
               <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white shadow p-3 text-xs border">
                 Оплатите после проверки комплекта — так спокойнее ✨
               </div>
@@ -310,7 +281,214 @@ export default function App() {
     </div>
   );
 }
+function HeroSection({ setScrollToForm }) {
+  const items = ["PS5", "Xbox", "VR очков"];
+  const [index, setIndex] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, 2200); // каждые 2.2 секунды меняется
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section id="hero" className="pt-24">
+      <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          {/* Заголовок */}
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            Аренда{" "}
+            <span className="relative inline-block w-[6ch]">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={items[index]}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.4 }}
+                  className="absolute left-0"
+                >
+                  {items[index]}
+                </motion.span>
+              </AnimatePresence>
+            </span>{" "}
+            и аксессуаров с доставкой по городу
+          </h1>
+
+          <p className="mt-4 text-neutral-600 text-lg">
+            Привезём, подключим, покажем — остаётся только играть
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href="#catalog"
+              className="inline-flex items-center justify-center rounded-2xl border border-neutral-300 px-6 py-2.5 text-sm font-semibold hover:bg-neutral-100 transition-colors shadow-sm"
+            >
+              📦 Открыть каталог
+            </a>
+
+            <button
+              onClick={() => setScrollToForm(true)}
+              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50"
+            >
+              Сделать заказ
+            </button>
+          </div>
+
+          <ul className="mt-6 grid grid-cols-2 gap-3 text-sm text-neutral-700">
+            <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Доставка от 300 ₽</li>
+            <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Самовывоз по договорённости</li>
+            <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Под любой запрос: вечеринки, ивенты, дома</li>
+            <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Поддержка в мессенджерах</li>
+          </ul>
+        </div>
+
+        <div className="relative">
+          <div className="relative">
+            <HeroSlideshow />
+            <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white shadow p-3 text-xs border">
+              Оплатите после проверки комплекта — так спокойнее ✨
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+function Header() {
+  const [language, setLanguage] = useState("ru");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrollToForm, setScrollToForm] = useState(false);
+
+  return (
+    <header className="w-full fixed top-0 left-0 bg-white/80 backdrop-blur-md shadow-sm z-50 font-['Inter',sans-serif]">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+        {/* Brand */}
+        <div className="flex items-center space-x-4 sm:space-x-8">
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-blue-700">
+            BRAND
+          </div>
+
+          {/* Navigation (hidden on small screens) */}
+          <nav className="hidden lg:flex space-x-6 text-gray-800 font-medium">
+            {[
+              { name: "О нас", id: "#about" },
+              { name: "Каталог", id: "#catalog" },
+              { name: "Условия аренды", id: "#terms" },
+              { name: "Часто задаваемые вопросы", id: "#faq" },
+              { name: "Сотрудничество", id: "#partners" },
+            ].map((item) => (
+              <motion.a
+                key={item.id}
+                href={item.id}
+                whileHover={{
+                  y: -2,
+                  color: "#6366f1", // 🌸 soft indigo-500
+                  transition: { duration: 0.3, ease: "easeInOut" },
+                }}
+                className="transition-colors text-sm xl:text-base cursor-pointer"
+              >
+                {item.name}
+              </motion.a>
+            ))}
+          </nav>
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          {/* Language Selector */}
+          <div className="hidden md:flex items-center space-x-2 text-gray-700">
+            <Globe className="w-5 h-5" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-transparent border-none focus:ring-0 cursor-pointer text-sm font-medium"
+            >
+              <option value="ru">RU</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+
+          {/* CTA Button */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+            <button
+              onClick={() => setScrollToForm(true)}
+              className="inline-flex items-center justify-center rounded-2xl 
+             bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-500 
+             text-white px-7 py-3 text-sm font-semibold shadow-md 
+             transition-all duration-500 ease-in-out 
+             hover:from-sky-500 hover:via-indigo-500 hover:to-purple-500 
+             hover:scale-105 hover:shadow-lg hover:shadow-indigo-300/40 
+             focus:outline-none focus:ring-4 focus:ring-indigo-300/50"
+            >
+              Сделать заказ
+            </button>
+          </motion.div>
+
+          {/* Mobile Menu Icon */}
+          <button
+            className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="lg:hidden bg-white shadow-md border-t border-gray-200 px-4 sm:px-6 py-4"
+          >
+            <div className="flex flex-col space-y-4 text-gray-800 font-medium">
+              {[
+                { name: "О нас", id: "#about" },
+                { name: "Каталог", id: "#catalog" },
+                { name: "Условия аренды", id: "#terms" },
+                { name: "Часто задаваемые вопросы", id: "#faq" },
+                { name: "Сотрудничество", id: "#partners" }
+              ].map((item) => (
+                <a
+                  key={item.id}
+                  href={item.id}
+                  className="hover:text-blue-600 transition-colors text-base sm:text-lg"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center space-x-2 text-gray-700">
+                <Globe className="w-5 h-5" />
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent border-none focus:ring-0 cursor-pointer text-sm font-medium"
+                >
+                  <option value="ru">RU</option>
+                  <option value="en">EN</option>
+                </select>
+              </div>
+
+              <button
+                onClick={() => setScrollToForm(true)}
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50 w-full sm:w-auto"
+              >
+                Сделать заказ
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
 function ProductCard({ product, term }) {
   const price = product.prices?.[term] ?? product.prices?.month ?? 0;
   return (
@@ -353,7 +531,38 @@ function ProductCard({ product, term }) {
     </div>
   );
 }
+function AnimatedTitle() {
+  const items = ["PS5", "Xbox", "VR очков"];
+  const [index, setIndex] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+      Аренда{" "}
+      <span className="relative inline-flex items-baseline justify-start text-indigo-600 w-[7ch] h-[1em] align-baseline">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={items[index]}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.4 }}
+            className="absolute left-0 top-1.5"
+          >
+            {items[index]}
+          </motion.span>
+        </AnimatePresence>
+      </span>{" "}
+      и аксессуаров с доставкой по городу
+    </h1>
+  );
+}
 // Раздел сайта с формой бронирования "Оформить заказ"
 function OrderForm({ scrollTo }) {
   const [form, setForm] = useState({
@@ -381,26 +590,45 @@ function OrderForm({ scrollTo }) {
   // Отправка формы — показываем сообщение после сабмита
   const onSubmit = async (e) => {
     e.preventDefault();
-  
-    try {
-      // Ссылка на Webhook 
-      const webhookUrl = "https://n8n.hive-dev.ru/webhook/ps5-order-form";
 
-      // Отправляем данные формы в Telegram (через твой backend/webhook)
-      await fetch(webhookUrl, {
+    const orderData = {
+      name: form.name,
+      surname: form.surname,
+      phone: form.phone,
+      package: form.package,
+      product: "PS5",
+      orderSource: "Сайт",
+      tg_id: "583073638",
+    };
+
+    try {
+      // Отправляем на локальный сервер
+      const resLocal = fetch("http://localhost:4000/api/log-order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
       });
-  
+
+      // Отправляем параллельно на n8n
+      const resN8N = fetch("https://n8n.hive-dev.ru/webhook/ps5-order-form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+
+      // Ждём завершения обоих запросов
+      const [localResult, n8nResult] = await Promise.all([resLocal, resN8N]);
+
+      if (!localResult.ok || !n8nResult.ok) {
+        throw new Error("Ошибка при отправке на один из серверов");
+      }
+
       setSent(true);
-    } catch (error) {
-      console.error("Ошибка при отправке:", error);
-      alert("Произошла ошибка при отправке. Попробуйте позже.");
+    } catch (err) {
+      console.error("Ошибка при отправке формы:", err);
+      alert("Произошла ошибка при отправке формы. Попробуйте позже.");
     }
-  };;
+  };
 
   // Если форма уже отправлена — показываем сообщение об успехе
   if (sent) {
@@ -531,6 +759,95 @@ function HeroSlideshow() {
     </div>
   );
 }
+/* <<<<old hero section>>>>> <<<after <Header>< inside App >
+<section id="hero" className="pt-24">
+        <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Аренда PS5/Xbox и аксессуаров с доставкой по городу</h1>
+            <p className="mt-4 text-neutral-600"> Привезём, подключим, покажем — остаётся только играть</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              
+              <a
+                href="#catalog"
+                className="inline-flex items-center justify-center rounded-2xl border border-neutral-300 px-6 py-2.5 text-sm font-semibold hover:bg-neutral-100 transition-colors shadow-sm"
+              >
+                📦 Открыть каталог
+              </a>
+
+              
+              <button
+                onClick={() => setScrollToForm(true)}
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50"
+              >
+                Сделать заказ
+              </button>
+            </div>
+            <ul className="mt-6 grid grid-cols-2 gap-3 text-sm text-neutral-700">
+              <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Доставка от 300 ₽</li>
+              <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Самовывоз по договорённости</li>
+              <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Под любой запрос: вечеринки, ивенты, дома</li>
+              <li className="flex items-center gap-2"><span className="size-2 rounded-full bg-black" /> Поддержка в мессенджерах</li>
+            </ul>
+          </div>
+          <div className="relative">
+             “Экран” 
+            <div className="relative">
+              <HeroSlideshow />
+
+              <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white shadow p-3 text-xs border">
+                Оплатите после проверки комплекта — так спокойнее ✨
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      */
+/*
+
+          <<<<<old header>>>>>> 
+
+<header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-gray-900/80 text-white py-3 shadow-md transition-all duration-300">
+  <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-6">
+   
+    <div className="text-xl font-bold tracking-tight mb-3 md:mb-0">
+      GameRent
+    </div>
+
+    
+    <nav className="flex space-x-5 text-base font-medium justify-center w-full md:w-auto">
+      <a href="#catalog" className="hover:text-indigo-400 transition-colors">
+        Каталог
+      </a>
+      <a href="#about" className="hover:text-indigo-400 transition-colors">
+        О нас
+      </a>
+      <a href="#delivery" className="hover:text-indigo-400 transition-colors">
+        Доставка
+      </a>
+      <a href="#contacts" className="hover:text-indigo-400 transition-colors">
+        Контакты
+      </a>
+      <a href="/cooperation" className="hover:text-indigo-400 transition-colors">
+        Сотрудничество
+      </a>
+    </nav>
+
+    
+    <div className="mt-3 md:mt-0">
+      <Button
+        onClick={() => {
+          const section = document.getElementById("catalog");
+          if (section) section.scrollIntoView({ behavior: "smooth" });
+        }}
+      >
+        Открыть каталог
+      </Button>
+    </div>
+  </div>
+</header>
+
+*/
+
 
 /* 
 {/* Top bar */
@@ -552,3 +869,114 @@ function HeroSlideshow() {
   </div>
 </header>
 */
+
+/*
+ n8n only version 
+
+ const onSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch("http://localhost:4000/api/log-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+       
+        body: JSON.stringify({
+          name: form.name,
+          surname: form.surname,
+          phone: form.phone,
+          package: form.package,
+          product: "PS5",
+          orderSource: "Сайт",
+          tg_id: "123456789", // можешь подставить свой реальный Telegram ID
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Ошибка при отправке данных");
+      }
+
+      setSent(true);
+    } catch (err) {
+      console.error(err);
+      alert("Произошла ошибка при отправке формы. Попробуйте позже.");
+    }
+  };
+  */
+/*const onSubmit = async (e) => {
+ e.preventDefault();
+
+ const orderData = {
+   name: form.name,
+   surname: form.surname,
+   phone: form.phone,
+   package: form.package,
+   product: "PS5",
+   orderSource: "Сайт",
+   tg_id: "123456789", // если нужно — подставь реальный Telegram ID
+ };
+
+ try {
+   const response = await fetch("https://n8n.hive-dev.ru/webhook/ps5-order-form", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify(orderData),
+   });
+
+   if (!response.ok) {
+     throw new Error("Ошибка при отправке на n8n");
+   }
+
+   setSent(true);
+ } catch (err) {
+   console.error("Ошибка при отправке формы:", err);
+   alert("Не удалось отправить заказ. Попробуйте позже.");
+ }
+};
+
+   combined version 
+
+const onSubmit = async (e) => {
+   e.preventDefault();
+
+   const orderData = {
+     name: form.name,
+     surname: form.surname,
+     phone: form.phone,
+     package: form.package,
+     product: "PS5",
+     orderSource: "Сайт",
+     tg_id: "123456789",
+   };
+
+   try {
+     // Отправляем на локальный сервер
+     const resLocal = fetch("http://localhost:4000/api/log-order", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(orderData),
+     });
+
+     // Отправляем параллельно на n8n
+     const resN8N = fetch("https://n8n.hive-dev.ru/webhook/ps5-order-form", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(orderData),
+     });
+
+     // Ждём завершения обоих запросов
+     const [localResult, n8nResult] = await Promise.all([resLocal, resN8N]);
+
+     if (!localResult.ok || !n8nResult.ok) {
+       throw new Error("Ошибка при отправке на один из серверов");
+     }
+
+     setSent(true);
+   } catch (err) {
+     console.error("Ошибка при отправке формы:", err);
+     alert("Произошла ошибка при отправке формы. Попробуйте позже.");
+   }
+  
+   */

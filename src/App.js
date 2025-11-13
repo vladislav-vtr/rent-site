@@ -5,9 +5,6 @@ import { Button } from "./components/ui/Button";
 import { Globe, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// — Tailwind для стилей (включён в Canvas)
-// — Никаких внешних API, чистый React
-// — Готовые блоки: хедер, герой, преимущества, каталог с фильтрами, FAQ, контакты/заказ
 
 export default function App() {
 

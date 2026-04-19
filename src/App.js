@@ -1,18 +1,18 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Button } from "./components/ui/Button";
-
+import AuthModal from "./components/ui/AuthModal";
 //header imports
+
 import { Globe, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
 
 export default function App() {
 
   const [activeTab, setActiveTab] = useState("consoles");
   const [term, setTerm] = useState("day");
   const [query, setQuery] = useState("");
-  const [scrollToForm, setScrollToForm] = useState(false);
-
+  const [scrollToForm, setScrollToForm] = useState(0);
+  const [showAuth, setShowAuth] = useState(false);
 
   const catalog = useMemo(
     () => ({
@@ -66,11 +66,25 @@ export default function App() {
     );
   }, [catalog, activeTab, query]);
 
+  const scrollToOrder = () => {
+    const section = document.getElementById("order");
+    if (!section) return;
+
+    const yOffset = -140; // подгони под высоту хедера
+    const y =
+      section.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset;
+
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
   return (
 
     <div className="min-h-screen bg-white text-neutral-900">
 
-      <Header />
+      <Header setShowAuth={setShowAuth} />
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
 
       {/* Hero */}
       <section id="hero" className="pt-24">
@@ -94,7 +108,7 @@ export default function App() {
 
               {/* Кнопка “Сделать заказ” */}
               <button
-                onClick={() => setScrollToForm(true)}
+                onClick={scrollToOrder}
                 className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50"
               >
                 Сделать заказ
@@ -278,7 +292,8 @@ export default function App() {
     </div>
   );
 }
-function HeroSection({ setScrollToForm }) {
+/*
+function HeroSection({ scrollToOrder }) {
   const items = ["PS5", "Xbox", "VR очков"];
   const [index, setIndex] = useState(0);
 
@@ -293,7 +308,7 @@ function HeroSection({ setScrollToForm }) {
     <section id="hero" className="pt-24">
       <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
         <div>
-          {/* Заголовок */}
+          {/* Заголовок /}
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
             Аренда{" "}
             <span className="relative inline-block w-[6ch]">
@@ -326,7 +341,7 @@ function HeroSection({ setScrollToForm }) {
             </a>
 
             <button
-              onClick={() => setScrollToForm(true)}
+              onClick={scrollToOrder}
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-7 py-3 text-sm font-semibold shadow-md transition-all duration-300 hover:from-pink-600 hover:to-red-600 hover:scale-105 hover:shadow-lg hover:shadow-pink-400/40 focus:outline-none focus:ring-4 focus:ring-pink-300/50"
             >
               Сделать заказ
@@ -353,7 +368,8 @@ function HeroSection({ setScrollToForm }) {
     </section>
   );
 }
-function Header() {
+*/
+function Header({ setShowAuth }) {
   const [language, setLanguage] = useState("ru");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollToForm, setScrollToForm] = useState(false);
@@ -381,7 +397,7 @@ function Header() {
                 href={item.id}
                 whileHover={{
                   y: -2,
-                  color: "#6366f1", // 🌸 soft indigo-500
+                  color: "#6366f1",
                   transition: { duration: 0.3, ease: "easeInOut" },
                 }}
                 className="transition-colors text-sm xl:text-base cursor-pointer"
@@ -410,16 +426,16 @@ function Header() {
           {/* CTA Button */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
             <button
-              onClick={() => setScrollToForm(true)}
+              onClick={() => setShowAuth(true)}
               className="inline-flex items-center justify-center rounded-2xl 
-             bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-500 
-             text-white px-7 py-3 text-sm font-semibold shadow-md 
-             transition-all duration-500 ease-in-out 
-             hover:from-sky-500 hover:via-indigo-500 hover:to-purple-500 
-             hover:scale-105 hover:shadow-lg hover:shadow-indigo-300/40 
-             focus:outline-none focus:ring-4 focus:ring-indigo-300/50"
+   bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-500 
+   text-white px-7 py-3 text-sm font-semibold shadow-md 
+   transition-all duration-500 ease-in-out 
+   hover:from-sky-500 hover:via-indigo-500 hover:to-purple-500 
+   hover:scale-105 hover:shadow-lg hover:shadow-indigo-300/40 
+   focus:outline-none focus:ring-4 focus:ring-indigo-300/50"
             >
-              Сделать заказ
+              Войти
             </button>
           </motion.div>
 
@@ -571,18 +587,17 @@ function OrderForm({ scrollTo }) {
   const [sent, setSent] = useState(false);
   const formRef = useRef(null);
 
-  // Скроллим ТОЛЬКО если передан флаг scrollTo = true
-  // Добавлено: учёт высоты хедера (yOffset), чтобы форма не пряталась под шапкой
   useEffect(() => {
     if (scrollTo && formRef.current) {
-      const yOffset = -200; // регулируй под высоту своего хедера
+      const yOffset = -200;
       const y =
         formRef.current.getBoundingClientRect().top +
         window.pageYOffset +
         yOffset;
+
       window.scrollTo({ top: y, behavior: "smooth" });
     }
-  }, [scrollTo]);
+  }, [scrollTo])
 
   // Отправка формы — показываем сообщение после сабмита
   const onSubmit = async (e) => {
@@ -756,6 +771,7 @@ function HeroSlideshow() {
     </div>
   );
 }
+
 /* <<<<old hero section>>>>> <<<after <Header>< inside App >
 <section id="hero" className="pt-24">
         <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">

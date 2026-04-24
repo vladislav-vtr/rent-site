@@ -104,12 +104,13 @@ export default function AuthModal({ show, onClose }) {
 
 import { useState } from "react";
 import { X, Eye, EyeOff, Mail, Phone, Lock, User, ChevronRight, ArrowLeft } from "lucide-react";
-
+ 
 const DEMO_USERS = [];
-
+ 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phoneRe = /^\+7[\s(]?\d{3}[)\s]?\d{3}-?\d{2}-?\d{2}$/;
-
+// Смягчённая проверка: минимум 7 цифр в любом формате
+const phoneRe = /^[\d\s()+\-]{7,}$/;
+ 
 function formatPhone(raw) {
   const d = raw.replace(/\D/g, "").replace(/^7/, "");
   let s = "+7";
@@ -119,7 +120,7 @@ function formatPhone(raw) {
   if (d.length >= 9) s += "-" + d.slice(8, 10);
   return s;
 }
-
+ 
 function Field({ label, icon: Icon, error, rightEl, ...p }) {
   return (
     <div style={{ display:"grid", gap:4 }}>
@@ -149,7 +150,7 @@ function Field({ label, icon: Icon, error, rightEl, ...p }) {
     </div>
   );
 }
-
+ 
 function PassField({ label, value, onChange, error }) {
   const [show, setShow] = useState(false);
   return (
@@ -167,7 +168,7 @@ function PassField({ label, value, onChange, error }) {
     />
   );
 }
-
+ 
 function GradBtn({ children, loading, onClick }) {
   return (
     <button onClick={onClick} type="button"
@@ -188,7 +189,7 @@ function GradBtn({ children, loading, onClick }) {
     </button>
   );
 }
-
+ 
 function ChoiceBtn({ icon: Icon, iconBg, iconColor, label, hoverBg, hoverBorder, hoverColor, onClick }) {
   const [hov, setHov] = useState(false);
   return (
@@ -210,7 +211,7 @@ function ChoiceBtn({ icon: Icon, iconBg, iconColor, label, hoverBg, hoverBorder,
     </button>
   );
 }
-
+ 
 function LinkBtn({ children, onClick }) {
   return (
     <button type="button" onClick={onClick}
@@ -219,27 +220,27 @@ function LinkBtn({ children, onClick }) {
     </button>
   );
 }
-
+ 
 export default function AuthModal({ isOpen = true, onClose = () => {} }) {
   const [view, setView]       = useState("choice");
   const [loading, setLoading] = useState(false);
   const [serverErr, setServerErr] = useState("");
-
+ 
   const [loginId,  setLoginId]  = useState("");
   const [loginPwd, setLoginPwd] = useState("");
   const [loginErr, setLoginErr] = useState({});
-
+ 
   const [reg, setReg]     = useState({ name:"", surname:"", phone:"", email:"", pwd:"", pwd2:"" });
   const [regErr, setRegErr] = useState({});
-
+ 
   const reset = () => {
     setView("choice"); setServerErr(""); setLoading(false);
     setLoginId(""); setLoginPwd(""); setLoginErr({});
     setReg({ name:"", surname:"", phone:"", email:"", pwd:"", pwd2:"" }); setRegErr({});
   };
-
+ 
   if (!isOpen) return null;
-
+ 
   const validateLogin = () => {
     const e = {};
     if (!loginId.trim()) e.id = "Введите e-mail или телефон";
@@ -248,54 +249,45 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
     setLoginErr(e);
     return !Object.keys(e).length;
   };
-
+ 
   const handleLogin = async () => {
     if (!validateLogin()) return;
     setLoading(true); setServerErr("");
     await new Promise(r => setTimeout(r, 800));
-
-    // === Supabase (раскомментировать) ===
-    // const { error } = await supabase.auth.signInWithPassword({ email: loginId, password: loginPwd });
-    // if (error) { setServerErr(error.message); setLoading(false); return; }
-
+ 
     const found = DEMO_USERS.find(u => (u.email===loginId||u.phone===loginId) && u.pwd===loginPwd);
     setLoading(false);
     if (!found) { setServerErr("Неверный логин или пароль"); return; }
     setView("success");
   };
-
+ 
   const validateReg = () => {
     const e = {};
     if (!reg.name.trim())    e.name    = "Введите имя";
     if (!reg.surname.trim()) e.surname = "Введите фамилию";
-    if (!phoneRe.test(reg.phone)) e.phone = "Некорректный телефон";
+    // Смягчённая проверка: достаточно 7+ цифр
+    const digits = reg.phone.replace(/\D/g, "");
+    if (digits.length < 7) e.phone = "Введите номер телефона (минимум 7 цифр)";
     if (!emailRe.test(reg.email)) e.email = "Некорректный e-mail";
     if (reg.pwd.length < 6)  e.pwd  = "Минимум 6 символов";
     if (reg.pwd !== reg.pwd2) e.pwd2 = "Пароли не совпадают";
     setRegErr(e);
     return !Object.keys(e).length;
   };
-
+ 
   const handleRegister = async () => {
     if (!validateReg()) return;
     setLoading(true); setServerErr("");
     await new Promise(r => setTimeout(r, 800));
-
-    // === Supabase (раскомментировать) ===
-    // const { error } = await supabase.auth.signUp({
-    //   email: reg.email, password: reg.pwd,
-    //   options: { data: { first_name: reg.name, last_name: reg.surname, phone: reg.phone } }
-    // });
-    // if (error) { setServerErr(error.message); setLoading(false); return; }
-
+ 
     const exists = DEMO_USERS.find(u => u.email===reg.email || u.phone===reg.phone);
     if (exists) { setServerErr("Аккаунт с таким e-mail или телефоном уже существует"); setLoading(false); return; }
     DEMO_USERS.push({ ...reg });
     setLoading(false); setView("success");
   };
-
+ 
   const titles = { choice:"Личный кабинет", login:"Войти в аккаунт", register:"Создать аккаунт", success:"" };
-
+ 
   const views = {
     choice: (
       <div style={{ display:"grid", gap:12 }}>
@@ -310,7 +302,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
         </p>
       </div>
     ),
-
+ 
     login: (
       <div style={{ display:"grid", gap:14 }}>
         <Field label="E-mail или телефон"
@@ -336,7 +328,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
         </p>
       </div>
     ),
-
+ 
     register: (
       <div style={{ display:"grid", gap:12 }}>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
@@ -367,7 +359,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
         </p>
       </div>
     ),
-
+ 
     success: (
       <div style={{ textAlign:"center", padding:"16px 0", display:"grid", gap:16, justifyItems:"center" }}>
         <div style={{ width:64, height:64, borderRadius:"50%", background:"linear-gradient(135deg,#6366f1,#a855f7)", display:"grid", placeItems:"center", boxShadow:"0 8px 24px rgba(99,102,241,.3)" }}>
@@ -386,7 +378,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
       </div>
     ),
   };
-
+ 
   return (
     <>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -395,7 +387,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
           padding:16, background:"rgba(0,0,0,.45)", backdropFilter:"blur(4px)" }}>
         <div style={{ width:"100%", maxWidth:420, background:"#fff", borderRadius:24,
           boxShadow:"0 25px 60px rgba(0,0,0,.2)", maxHeight:"90vh", overflowY:"auto" }}>
-
+ 
           {/* Header */}
           <div style={{ position:"relative", padding:"22px 24px 16px", borderBottom:"1px solid #f3f4f6", textAlign:"center" }}>
             {(view==="login"||view==="register") && (
@@ -415,7 +407,7 @@ export default function AuthModal({ isOpen = true, onClose = () => {} }) {
               <X size={15} color="#4b5563"/>
             </button>
           </div>
-
+ 
           {/* Body */}
           <div style={{ padding:"20px 24px 24px" }}>
             {views[view]}
